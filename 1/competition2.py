@@ -12,10 +12,23 @@ import math
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
 # Click "Open user guide" on the EV3 extension tab for more information.
 
+# In this competition, we did a open loop robot that moves to a target point and angle.
+
 # Input Parameters
 
-target = [25, 25]
-target_angle = 180
+# Left point
+target = [127, 35]
+target_angle = 180 - 130
+speed = 200
+
+# Center point
+# target = [145, 0]
+# target_angle = 180-225
+# speed = 200
+
+# Right point
+target = [114, - 26]
+target_angle = 180 - 60
 speed = 200
 
 # Setup
@@ -52,7 +65,7 @@ def centimeters_to_degrees(centimeters):
 
 
 def rotate(degrees):
-    factor = 1.889
+    factor = 1.899
     c.run_angle(speed, degrees * factor, wait=False)
     b.run_angle(speed, -degrees * factor, wait=True)
     wait(500)
@@ -62,12 +75,8 @@ def move_forward(distance):
   c.run_angle(speed, centimeters_to_degrees(distance), wait=False)
   b.run_angle(speed, centimeters_to_degrees(distance), wait=True)
 
+rotate(180)
 move_to_target(target, target_angle)
-
-# rotate(90)
-# rotate(0)
-# # rotate(180)
-# # rotate(-180)
 
 ev3.speaker.beep(1000, 500)
 
