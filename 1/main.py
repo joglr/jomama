@@ -14,8 +14,8 @@ import math
 
 # Input Parameters
 
-target = [50, 50]
-target_angle = 50
+target = [25, 25]
+target_angle = 180
 speed = 200
 
 # Setup
@@ -30,34 +30,44 @@ b = Motor(Port.B)
 def move_to_target(target, target_angle):
   x, y = target
   hyp = ((x ** 2) + (y ** 2)) ** 0.5
-  angle = math.acos(x / hyp)
+  angle = math.acos(x / hyp) if hyp != 0 else 0
   angle_degrees = math.degrees(angle)
+
+  print("Hypotenuse: ", hyp)
+  print("Angle: ", angle_degrees)
+
   rotate(angle_degrees)
   move_forward(hyp)
-  rotate(target_angle - angle_degrees)
+  final_rotation = target_angle - angle_degrees
+  if (final_rotation ** 2) ** 0.5 > 0.01:
+    rotate(target_angle - angle_degrees)
 
 """
 100 centimeters = 8.5 rotations
 """
 
 def centimeters_to_degrees(centimeters):
-    return (centimeters / 100) * (8.5) * 360
+    return (centimeters / 100) * (8.5 * (50 / 64)) * 360
 
 
 
 def rotate(degrees):
-    factor = 1.884
-    c.run_target(speed, degrees * factor, wait=False)
-    b.run_target(speed, -degrees * factor, wait=False)
+    factor = 1.889
+    c.run_angle(speed, degrees * factor, wait=False)
+    b.run_angle(speed, -degrees * factor, wait=True)
+    wait(500)
+
 
 def move_forward(distance):
-  c.run_target(speed, centimeters_to_degrees(distance), wait=False)
-  b.run_target(speed, centimeters_to_degrees(distance), wait=False)
-
-# rotate(360)
-# rotate(-360)
+  c.run_angle(speed, centimeters_to_degrees(distance), wait=False)
+  b.run_angle(speed, centimeters_to_degrees(distance), wait=True)
 
 move_to_target(target, target_angle)
+
+# rotate(90)
+# rotate(0)
+# # rotate(180)
+# # rotate(-180)
 
 ev3.speaker.beep(1000, 500)
 
