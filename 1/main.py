@@ -6,6 +6,7 @@ from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
+import math
 
 
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
@@ -26,11 +27,14 @@ c = Motor(Port.C)
 b = Motor(Port.B)
 
 
-# def move_to_target(target, target_angle):
-
-
-
-
+def move_to_target(target, target_angle):
+  x, y = target
+  hyp = ((x ** 2) + (y ** 2)) ** 0.5
+  angle = math.acos(x / hyp)
+  angle_degrees = math.degrees(angle)
+  rotate(angle_degrees)
+  move_forward(hyp)
+  rotate(target_angle - angle_degrees)
 
 """
 100 centimeters = 8.5 rotations
@@ -51,7 +55,9 @@ def move_forward(distance):
   b.run_target(speed, centimeters_to_degrees(distance), wait=False)
 
 # rotate(360)
-rotate(-360)
+# rotate(-360)
+
+move_to_target(target, target_angle)
 
 ev3.speaker.beep(1000, 500)
 
