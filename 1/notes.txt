@@ -1,0 +1,6 @@
+
+1:
+k = 20
+ambient
+
+loses the line at sharp turns
