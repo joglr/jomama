@@ -12,6 +12,7 @@ RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
 
+
 def read_world_and_find_pois(filename):
     robot_pos = None
     target_pos = None
@@ -35,6 +36,7 @@ def read_world_and_find_pois(filename):
             y += 1
         return world, robot_pos, target_pos, can_pos
 
+
 # Moving the robot
 
 # Tree search of moves that the cans can make
@@ -42,16 +44,14 @@ def read_world_and_find_pois(filename):
 
 # rx, ry = robot
 
+
 def bfs(world, can, target):
     cx, cy = can
     tx, ty = target
 
     visited = set([can])
-    parent_map = {
-        can: None
-    }
+    parent_map = {can: None}
     queue = [can]
-
 
     # Queue the movements that the cans can make
 
@@ -74,15 +74,14 @@ def bfs(world, can, target):
             while parent_map[current_pos] is not None:
                 parent = parent_map[current_pos]
                 path.append(parent)
-                current_pos = parent
+                parent_pos = parent["pos"]
+                current_pos = parent_pos
                 i += 1
                 if i > 1_000_000:
                     print("💩 gave up")
                     break
 
-            print("reversd_path:", path)
-            return reversed(path)
-
+            return list(reversed(path))
 
         left = add(pos, LEFT)
         right = add(pos, RIGHT)
@@ -96,25 +95,25 @@ def bfs(world, can, target):
 
         if is_free(world, left) and is_free(world, right) and left not in visited:
             print("can be pushed left from " + str(pos))
-            parent_map[left] = pos
+            parent_map[left] = {"pos": pos, "robot": right, "push": LEFT}
             visited.add(left)
             queue.append(left)
 
         if is_free(world, right) and is_free(world, left) and right not in visited:
             print("can be pushed right from " + str(pos))
-            parent_map[right] = pos
+            parent_map[right] = {"pos": pos, "robot": left, "push": RIGHT}
             visited.add(right)
             queue.append(right)
 
         if is_free(world, up) and is_free(world, down) and up not in visited:
             print("can be pushed up from " + str(pos))
-            parent_map[up] = pos
+            parent_map[up] = {"pos": pos, "robot": down, "push": UP}
             visited.add(up)
             queue.append(up)
 
         if is_free(world, down) and is_free(world, up) and down not in visited:
             print("can be pushed down from " + str(pos))
-            parent_map[down] = pos
+            parent_map[down] = {"pos": pos, "robot": up, "push": DOWN}
             visited.add(down)
             queue.append(down)
 
@@ -124,6 +123,7 @@ def bfs(world, can, target):
         print_world(world, visited)
         i += 1
 
+
 def print_world(world, visited):
     char_map = {
         AIR: " ",
@@ -131,7 +131,7 @@ def print_world(world, visited):
         CAN: "C",
         TARGET: "T",
         ROBOT: "R",
-        CAN_ON_TARGET: "*"
+        CAN_ON_TARGET: "*",
     }
     print()
     for y, row in enumerate(world):
@@ -143,6 +143,7 @@ def print_world(world, visited):
         print()
     print()
 
+
 def is_free(world, pos):
     x, y = pos
 
@@ -153,12 +154,14 @@ def is_free(world, pos):
     except IndexError:
         return False
 
-    spot_is_free = (spot == AIR or spot == ROBOT or spot == TARGET)
+    spot_is_free = spot == AIR or spot == ROBOT or spot == TARGET
 
-    return  spot_is_free
+    return spot_is_free
+
 
 def add(a, b):
     return (a[0] + b[0], a[1] + b[1])
+
 
 def main():
     filename = sys.argv[1]
@@ -166,6 +169,7 @@ def main():
 
     path = bfs(world, can_pos, target_pos)
     print("path:", path)
+
 
 if __name__ == "__main__":
     main()
