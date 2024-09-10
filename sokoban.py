@@ -3,9 +3,9 @@ import sys
 WALL = "X"
 AIR = " "
 CAN = "$"
-GOAL = "."
+TARGET = "."
 ROBOT = "@"
-CAN_ON_GOAL = "*"
+CAN_ON_TARGET = "*"
 
 LEFT = (-1, 0)
 RIGHT = (1, 0)
@@ -14,7 +14,7 @@ DOWN = (0, 1)
 
 def read_world_and_find_pois(filename):
     robot_pos = None
-    goal_pos = None
+    target_pos = None
     can_pos = None
 
     with open(filename) as f:
@@ -25,15 +25,15 @@ def read_world_and_find_pois(filename):
             if ROBOT in row:
                 robot_pos = (row.index(ROBOT), len(world))
 
-            if GOAL in row:
-                goal_pos = (row.index(GOAL), len(world))
+            if TARGET in row:
+                target_pos = (row.index(TARGET), len(world))
 
             if CAN in row:
                 can_pos = (row.index(CAN), len(world))
 
             world.append(row)
             y += 1
-        return world, robot_pos, goal_pos, can_pos
+        return world, robot_pos, target_pos, can_pos
 
 # Moving the robot
 
@@ -42,12 +42,14 @@ def read_world_and_find_pois(filename):
 
 # rx, ry = robot
 
-def bfs(world, can, goal):
+def bfs(world, can, target):
     cx, cy = can
-    tx, ty = goal
+    tx, ty = target
 
     visited = set([can])
-    parent_map = {}
+    parent_map = {
+        can: None
+    }
     queue = [can]
 
 
@@ -59,13 +61,25 @@ def bfs(world, can, goal):
         print(f"{pos = }")
         print(f"{queue = }")
 
-        if pos == goal:
-            print("🎖️ found goal")
+        if pos == target:
+            print("🎖️ found target")
             # Return backtracked list of pushes that neees to be performed
             path = [pos]
             current_pos = pos
-            while current_pos != can:
-                path.append(parent_map[current_pos])
+
+            i = 0
+
+            print(parent_map)
+
+            while parent_map[current_pos] is not None:
+                parent = parent_map[current_pos]
+                path.append(parent)
+                current_pos = parent
+                i += 1
+                if i > 1_000_000:
+                    print("💩 gave up")
+                    break
+
             print("reversd_path:", path)
             return reversed(path)
 
@@ -104,17 +118,28 @@ def bfs(world, can, goal):
             visited.add(down)
             queue.append(down)
 
+        print("____ queue   ____")
         print_world(world, queue)
+        print("____ visited ____")
+        print_world(world, visited)
         i += 1
 
 def print_world(world, visited):
+    char_map = {
+        AIR: " ",
+        WALL: "+",
+        CAN: "C",
+        TARGET: "T",
+        ROBOT: "R",
+        CAN_ON_TARGET: "*"
+    }
     print()
     for y, row in enumerate(world):
         for x, spot in enumerate(row):
             if (x, y) in visited:
-                print("V ", end="")
+                print(str(list(visited).index((x, y))) + " ", end="")
             else:
-                print(spot + " ", end="")
+                print(char_map[spot] + " ", end="")
         print()
     print()
 
@@ -128,7 +153,7 @@ def is_free(world, pos):
     except IndexError:
         return False
 
-    spot_is_free = (spot == AIR or spot == ROBOT)
+    spot_is_free = (spot == AIR or spot == ROBOT or spot == TARGET)
 
     return  spot_is_free
 
@@ -137,9 +162,9 @@ def add(a, b):
 
 def main():
     filename = sys.argv[1]
-    world, robot_pos, goal_pos, can_pos = read_world_and_find_pois(filename)
+    world, robot_pos, target_pos, can_pos = read_world_and_find_pois(filename)
 
-    path = bfs(world, can_pos, goal_pos)
+    path = bfs(world, can_pos, target_pos)
     print("path:", path)
 
 if __name__ == "__main__":
