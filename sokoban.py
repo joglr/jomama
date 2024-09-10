@@ -45,7 +45,7 @@ def read_world_and_find_pois(filename):
 # rx, ry = robot
 
 
-def bfs(world, can, target):
+def bfs_push(world, can, target):
     cx, cy = can
     tx, ty = target
 
@@ -167,7 +167,7 @@ def main():
     filename = sys.argv[1]
     world, robot_pos, target_pos, can_pos = read_world_and_find_pois(filename)
 
-    path = bfs(world, can_pos, target_pos)
+    path = bfs_push(world, can_pos, target_pos)
     print("path:", path)
 
 
