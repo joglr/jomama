@@ -1,3 +1,4 @@
+import copy
 import sys
 
 class TreeNode:
@@ -63,12 +64,12 @@ def checkIfWithinMap(state, robotPos):
         return True
     return False
 
-def canAndThenWallOrCanAndThenCan(state, robotPos, action):
+def canAndThenWallOrCanAndThenCan(currentState, robotPos, action):
     nextRobotPos = addCoordinates(robotPos, action)
     currX, currY = robotPos
     nextX, nextY = nextRobotPos
-    if state[currX][currY] == CAN:
-        if state[nextX][nextY] == CAN | state[nextX][nextX] == WALL:
+    if currentState[currX][currY] == CAN:
+        if currentState[nextX][nextY] == CAN or currentState[nextX][nextY] == WALL:
             return True
     return False
 
@@ -101,19 +102,19 @@ def checkIfNextMoveIsCan(state, nextRobotPos):
     return False
 
 
-def makeMove(state, robotPosition, action):
+def makeMove(currentState, robotPosition, action):
     nextRobotPosition = addCoordinates(robotPosition, action)
-    if checkIfWithinMap(state, nextRobotPosition):
-        if not canAndThenWallOrCanAndThenCan(state, nextRobotPosition, action):
-            newState = state
-            if checkIfNextMoveIsCan(state, nextRobotPosition):
+    if checkIfWithinMap(currentState, nextRobotPosition):
+        if not canAndThenWallOrCanAndThenCan(currentState, nextRobotPosition, action):
+            nextState = copy.deepcopy(currentState)
+            if checkIfNextMoveIsCan(currentState, nextRobotPosition):
                 nextCanPosition = addCoordinates(nextRobotPosition, action)
-                newState = setNewRobotAndCanPosition(state, nextRobotPosition, nextCanPosition)
+                nextState = setNewRobotAndCanPosition(nextState, nextRobotPosition, nextCanPosition)
             else:
-                newState = setNewRobotPosition(state, nextRobotPosition)
+                nextState = setNewRobotPosition(nextState, nextRobotPosition)
 
-            newState = setPreviousRobotPosition(newState, nextRobotPosition, action)
-            return newState
+            nextState = setPreviousRobotPosition(nextState, nextRobotPosition, action)
+            return nextState
         
     return 
     
@@ -127,23 +128,31 @@ def main():
     initialState = parse_world(filename)
 
     openQueue.append(initialState)
-
-    robotPosition = findElementPositions(initialState, ROBOT)[0]
     targetPositions = findElementPositions(initialState, TARGET)
 
+    solutionFound = False
+
+    i = -1
     while len(openQueue) > 0:
         currentState = openQueue.pop(0)
+        #for s in currentState:
+        #    print(s)
+        #print("----------------------")
         closedList.append(currentState)
-
+        robotPosition = findElementPositions(currentState, ROBOT)[0]
         for action in actions:
             newState = makeMove(currentState, robotPosition, action)
-
             if newState is not None and newState not in closedList:
+                
                 canPositions = findElementPositions(newState, CAN)
                 if set(targetPositions) == set(canPositions):
+                    for s in newState:
+                        print(s)
+                    solutionFound = True
                     break
                 openQueue.append(newState)
-        
+        if solutionFound:
+            break  
 
 if __name__ == "__main__":
     main()
