@@ -7,7 +7,7 @@ class TreeNode:
         self.parent = parent
         self.action = action
 
-WALL = "X"
+WALL = "#"
 AIR = " "
 CAN = "$"
 TARGET = "."
@@ -168,11 +168,12 @@ def convertCoordinatesIntoInstructions(path):
             instructions.append("down")
     return instructions
 
-
+def stateToHashable(state):
+    return tuple(tuple(row) for row in state)
 
 def main():
     openQueue = []
-    closedList = []
+    closedSet = set()
 
     filename = sys.argv[1]
     initialState = parse_world(filename)
@@ -190,7 +191,7 @@ def main():
         currentNode = openQueue.pop(0)
         currentState = currentNode.state
 
-        closedList.append(currentState)
+        closedSet.add(stateToHashable(currentState))
 
         robotPosition = findElementPositions(currentState, ROBOT)[0]
 
@@ -202,7 +203,7 @@ def main():
                     action = (action, action, (-action[0], -action[1]))
             else:
                 newState = result
-            if newState is not None and newState not in closedList:
+            if newState is not None and stateToHashable(newState) not in closedSet:
                 newNode = TreeNode(state=newState, parent=currentNode, action=action)
 
                 canPositions = findElementPositions(newState, CAN)
@@ -218,8 +219,9 @@ def main():
     if solutionFound and solutionNode:
         # Reconstruct the path by backtracking from the solution node
         path = reconstruct_path(solutionNode)
+        #print(path)
         flattenPath = flattenSteps(path)
-        print(flattenPath)
+        #print(flattenPath)
         instructions = convertCoordinatesIntoInstructions(flattenPath)
         print(instructions)
         #print("Solution path (actions):", path)
