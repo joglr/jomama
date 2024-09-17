@@ -150,8 +150,8 @@ def flattenSteps(steps):
     for step in steps:
         if isinstance(step, tuple) and len(step) == 2:  # Check if it's a tuple of size 2 (normal move)
             flattened.append(step)
-        elif isinstance(step, (list, tuple)) and len(step) == 3:  # Check if it's a triplet or nested list
-            flattened.extend(flattenSteps(step))  # Recursively flatten the triplet or list
+        elif isinstance(step, (list, tuple)) and len(step) in [3, 4]:  # Check if it's a triplet or fourplet
+            flattened.extend(flattenSteps(step))  # Recursively flatten triplets or fourplets
     return flattened
 
 
@@ -185,9 +185,9 @@ def mergeTripletsIfSame(arr):
             # Check if the next element is also a triplet and contents are identical
             if isinstance(next_elem, tuple) and len(next_elem) == 3:
                 if current == next_elem:
-                    # Merge the two triplets
-                    merged_triplet = (current[0], next_elem[0], current[2])
-                    result.append(merged_triplet)
+                    # Merge the two triplets into a fourplet
+                    fourplet = (current[0], current[0], next_elem[0], current[2])
+                    result.append(fourplet)
                     # Skip the next triplet since it's merged
                     i += 2
                     continue
@@ -197,6 +197,7 @@ def mergeTripletsIfSame(arr):
         i += 1
     
     return result
+
 
 def solve(filename=None):
     openQueue = []
@@ -255,7 +256,6 @@ def solve(filename=None):
         # Reconstruct the path by backtracking from the solution node
         path = reconstruct_path(solutionNode)
         simplePath = mergeTripletsIfSame(path)
-        #print(path)
         flattenPath = flattenSteps(simplePath)
         #print(flattenPath)
         instructions = convertCoordinatesIntoInstructions(flattenPath)
