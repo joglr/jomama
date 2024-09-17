@@ -1,3 +1,4 @@
+#!/usr/bin/env pybricks-micropython
 import copy
 import sys
 
@@ -42,7 +43,7 @@ def parse_world(filename):
             world.append(row)
 
         return world
-    
+
 def addCoordinates(p1, p2):
     p1X, p1Y = p1
     p2X, p2Y = p2
@@ -122,8 +123,8 @@ def makeMove(currentState, robotPosition, action):
 
             nextState = setPreviousRobotPosition(nextState, nextRobotPosition, action)
             return [nextState, nextMoveIsCan]
-        
-    return 
+
+    return
 
 def reconstruct_path(node):
     path = []
@@ -171,11 +172,19 @@ def convertCoordinatesIntoInstructions(path):
 def stateToHashable(state):
     return tuple(tuple(row) for row in state)
 
-def main():
+def solve(filename=None):
     openQueue = []
     closedSet = set()
 
-    filename = sys.argv[1]
+    if filename is None:
+        try:
+            filename = sys.argv[1]
+        except IndexError:
+            pass
+
+    if filename is None:
+        filename = "worlds/board.txt"
+
     initialState = parse_world(filename)
 
     # Create the root node (initial state) with no parent and no action
@@ -224,12 +233,14 @@ def main():
         #print(flattenPath)
         instructions = convertCoordinatesIntoInstructions(flattenPath)
         print(instructions)
+        return instructions
         #print("Solution path (actions):", path)
         print("Final state:")
         for row in solutionNode.state:
             print(''.join(row))
     else:
         print("No solution found")
+        return None
 
 if __name__ == "__main__":
     main()

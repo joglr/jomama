@@ -24,7 +24,9 @@ class MazeRobot:
         self.left_min = 1
         self.right_min = 1
 
-        self.beeper = EV3Brick()
+        self.brick = EV3Brick()
+
+        self.orientation = 0
 
         self.drivebase = DriveBase(self.left_motor,
                                    self.right_motor,
@@ -34,7 +36,7 @@ class MazeRobot:
         self.instructions = iter(instructions)
 
 
-
+        #self._next_instruction()
         self.neutral_ambient = self.find_ambient()
 
         # this will maybe also have some info about position, possibly
@@ -57,6 +59,8 @@ class MazeRobot:
             current_ambient = self.drive_sensor.ambient()
             difference_neutral = current_ambient - NEUTRAL_AMBIENT
 
+            self.brick.screen.draw_text(72, 15, "Angle: " + str(self.orientation), text_color=Color.BLACK, background_color=Color.WHITE)
+
             dark = difference_neutral < 0
             if dark:
                 self._drive(speed=(1/(abs(difference_neutral)+1)) * 50,
@@ -74,25 +78,37 @@ class MazeRobot:
 
     def _check_intersection(self):
         if self.left_sensor.ambient() <= self.left_min or self.right_sensor.ambient() <= self.right_min:
-            self.beeper.speaker.beep()
+            self.brick.speaker.beep()
             return True
 
     def _next_instruction(self):
-        instruction = next(self.instructions)
+        instruction_to_degrees = {'left': 90, 'right': 270, 'up': 0, 'down': 180}
+        degrees_to_instruction = {90: 'left', 270: 'right', 0: 'straight', 180: 'turn'}
+        instruction_str = next(self.instructions)
+
+        degrees = instruction_to_degrees[instruction_str]
+        turn_degrees = ((degrees + self.orientation) + 360) % 360
+        instruction = degrees_to_instruction[turn_degrees]
 
         if instruction == 'left':
+            self.add_orientation(-90)
             self._turn_left()
             #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
         elif instruction == 'right':
+            self.add_orientation(90)
             self._turn_right()
             #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
         elif instruction == 'straight':
             self._go_straight()
             #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
         elif instruction == 'turn':
+            self.add_orientation(180)
             self._turn_around()
             #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
 
+    def add_orientation(self, num):
+        self.orientation += num + 360
+        self.orientation %= 360
 
     def _turn_right(self):
         self._drive(speed=30, turn_rate=0)
@@ -122,7 +138,7 @@ class MazeRobot:
         self._drive(speed=0, turn_rate=40)
         time.sleep(6.3)
         self._drive(speed=-20, turn_rate=0)
-        time.sleep(3)
+        time.sleep(3.5)
 
     def find_ambient(self):
         ambients = []
@@ -253,19 +269,15 @@ class MazeRobot:
         time.sleep(2.5)
 
 
-new_instructions = ['left',
-                    'straight',
-                    'turn',
-                    'right',
-                    'right',
-                    'right',
-                    'straight',
-                    'turn',
-                    'left',
-                    'left',
-                    'left',
-                    'straight']
+def main():
+    new_instructions = ['up',
+                        'up',
+                        'down'
+                ]
 
-maze_robot = MazeRobot(new_instructions)
+    maze_robot = MazeRobot(new_instructions)
 
-maze_robot._follow_line()
+    maze_robot._follow_line()
+
+if __file__ == "__main__":
+    main()
