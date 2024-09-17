@@ -2,7 +2,7 @@ import copy
 import sys
 
 class TreeNode:
-    def __init__(self, state, parent=None, action=None):
+    def __init__(self, state, parent=None, action=None, orientation=None):
         self.state = state
         self.parent = parent
         self.action = action
@@ -14,10 +14,22 @@ TARGET = "."
 ROBOT = "@"
 CAN_ON_TARGET = "*"
 
+'''
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
+'''
+LEFT = (0, -1)
+RIGHT = (0, 1)
+UP = (-1, 0)
+DOWN = (1, 0)
+
+ORIENTATION_U = 12
+ORIENTATION_D = 6
+ORIENTATION_L = 9
+ORIENTATION_R = 3
+
 
 actions = [LEFT, RIGHT, UP, DOWN]
 
@@ -46,6 +58,8 @@ def findElementPositions(state, element):
         for col_index, value in enumerate(row):
             if value == element:
                 targetPositions.append((row_index, col_index))
+            elif value == CAN_ON_TARGET and (element == CAN or element == TARGET):
+                targetPositions.append((row_index, col_index))
     return targetPositions
 
 
@@ -59,8 +73,8 @@ def canAndThenWallOrCanAndThenCan(currentState, robotPos, action):
     nextRobotPos = addCoordinates(robotPos, action)
     currX, currY = robotPos
     nextX, nextY = nextRobotPos
-    if currentState[currX][currY] == CAN:
-        if currentState[nextX][nextY] == CAN or currentState[nextX][nextY] == WALL:
+    if currentState[currX][currY] == CAN or currentState[currX][currY] == CAN_ON_TARGET:
+        if currentState[nextX][nextY] == CAN or currentState[nextX][nextY] == WALL or currentState[nextX][nextY] == CAN_ON_TARGET:
             return True
     return False
 
@@ -88,24 +102,26 @@ def setNewRobotPosition(state, nextRobotPos):
 
 def checkIfNextMoveIsCan(state, nextRobotPos):
     robotX, robotY = nextRobotPos
-    if state[robotX][robotY] == CAN:
+    if state[robotX][robotY] == CAN or state[robotX][robotY] == CAN_ON_TARGET:
         return True
     return False
 
 
 def makeMove(currentState, robotPosition, action):
+    nextMoveIsCan = False
     nextRobotPosition = addCoordinates(robotPosition, action)
     if checkIfWithinMap(currentState, nextRobotPosition):
         if not canAndThenWallOrCanAndThenCan(currentState, nextRobotPosition, action):
             nextState = copy.deepcopy(currentState)
             if checkIfNextMoveIsCan(currentState, nextRobotPosition):
+                nextMoveIsCan = True
                 nextCanPosition = addCoordinates(nextRobotPosition, action)
                 nextState = setNewRobotAndCanPosition(nextState, nextRobotPosition, nextCanPosition)
             else:
                 nextState = setNewRobotPosition(nextState, nextRobotPosition)
 
             nextState = setPreviousRobotPosition(nextState, nextRobotPosition, action)
-            return nextState
+            return [nextState, nextMoveIsCan]
         
     return 
 
@@ -116,6 +132,43 @@ def reconstruct_path(node):
         node = node.parent
     path.reverse()
     return path
+
+
+orientations = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # [Up, Right, Down, Left]
+
+# Helper function to get the new orientation after turning
+def turn_robot(current_orientation, turn_direction):
+    idx = orientations.index(current_orientation)
+    if turn_direction == "left":
+        idx = (idx - 1) % 4  # Turning left means moving counterclockwise
+    elif turn_direction == "right":
+        idx = (idx + 1) % 4  # Turning right means moving clockwise
+    return orientations[idx]
+
+def flattenSteps(steps):
+    flattened = []
+    for step in steps:
+        if isinstance(step, tuple) and len(step) == 2:  # Check if it's a tuple of size 2 (normal move)
+            flattened.append(step)
+        elif isinstance(step, (list, tuple)) and len(step) == 3:  # Check if it's a triplet or nested list
+            flattened.extend(flattenSteps(step))  # Recursively flatten the triplet or list
+    return flattened
+
+
+def convertCoordinatesIntoInstructions(path):
+    instructions = []
+    for step in path:
+        if step == LEFT:
+            instructions.append("left")
+        elif step == RIGHT:
+            instructions.append("right")
+        elif step == UP:
+            instructions.append("up")
+        elif step == DOWN:
+            instructions.append("down")
+    return instructions
+
+
 
 def main():
     openQueue = []
@@ -142,7 +195,13 @@ def main():
         robotPosition = findElementPositions(currentState, ROBOT)[0]
 
         for action in actions:
-            newState = makeMove(currentState, robotPosition, action)
+            result = makeMove(currentState, robotPosition, action)
+            if result is not None:
+                newState, nextMoveIsCan = result
+                if nextMoveIsCan == True:
+                    action = (action, action, (-action[0], -action[1]))
+            else:
+                newState = result
             if newState is not None and newState not in closedList:
                 newNode = TreeNode(state=newState, parent=currentNode, action=action)
 
@@ -159,7 +218,11 @@ def main():
     if solutionFound and solutionNode:
         # Reconstruct the path by backtracking from the solution node
         path = reconstruct_path(solutionNode)
-        print("Solution path (actions):", path)
+        flattenPath = flattenSteps(path)
+        print(flattenPath)
+        instructions = convertCoordinatesIntoInstructions(flattenPath)
+        print(instructions)
+        #print("Solution path (actions):", path)
         print("Final state:")
         for row in solutionNode.state:
             print(''.join(row))
