@@ -87,13 +87,13 @@ class MazeRobot:
 
     def _turn_right(self):
         self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(2.5)
+        time.sleep(3.5)
         self.drivebase.drive(speed=-0, turn_rate=-40)
         time.sleep(3)
 
     def _turn_left(self):
         self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(2.5)
+        time.sleep(3.5)
         self.drivebase.drive(speed=-0, turn_rate=40)
         time.sleep(3)
 
@@ -102,10 +102,12 @@ class MazeRobot:
         time.sleep(3)
 
     def _turn_around(self):
-        self.drivebase.drive(speed=--20, turn_rate=0)
-        time.sleep(5)
-        self.drivebase.drive(speed=-0, turn_rate=30)
-        time.sleep(6.2)
+        self.drivebase.drive(speed=20, turn_rate=0)
+        time.sleep(4)
+        self.drivebase.drive(speed=-0, turn_rate=40)
+        time.sleep(6.3)
+        self.drivebase.drive(speed=20, turn_rate=0)
+        time.sleep(3)
 
     def find_ambient(self):
         ambients = []
@@ -241,7 +243,6 @@ new_instructions = ['left',
                     'turn',
                     'right',
                     'right',
-                    'straight',
                     'right',
                     'straight',
                     'turn',
