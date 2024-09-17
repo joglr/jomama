@@ -171,6 +171,33 @@ def convertCoordinatesIntoInstructions(path):
 def stateToHashable(state):
     return tuple(tuple(row) for row in state)
 
+def mergeTripletsIfSame(arr):
+    i = 0
+    result = []
+    
+    while i < len(arr):
+        current = arr[i]
+        
+        # Check if the current element and the next one are triplets
+        if isinstance(current, tuple) and len(current) == 3 and i + 1 < len(arr):
+            next_elem = arr[i + 1]
+            
+            # Check if the next element is also a triplet and contents are identical
+            if isinstance(next_elem, tuple) and len(next_elem) == 3:
+                if current == next_elem:
+                    # Merge the two triplets
+                    merged_triplet = (current[0], next_elem[0], current[2])
+                    result.append(merged_triplet)
+                    # Skip the next triplet since it's merged
+                    i += 2
+                    continue
+        
+        # If not a triplet or no merging, append the current element as is
+        result.append(current)
+        i += 1
+    
+    return result
+
 def solve(filename=None):
     openQueue = []
     closedSet = set()
@@ -227,10 +254,12 @@ def solve(filename=None):
     if solutionFound and solutionNode:
         # Reconstruct the path by backtracking from the solution node
         path = reconstruct_path(solutionNode)
+        simplePath = mergeTripletsIfSame(path)
         #print(path)
-        flattenPath = flattenSteps(path)
+        flattenPath = flattenSteps(simplePath)
         #print(flattenPath)
         instructions = convertCoordinatesIntoInstructions(flattenPath)
+        instructions.pop()  # Removes the last element
         print(instructions)
         #print("Solution path (actions):", path)
         print("Final state:")
