@@ -10,6 +10,7 @@ from pybricks.media.ev3dev import SoundFile, ImageFile
 import time
 import random
 
+
 class MazeRobot:
 
     def __init__(self, instructions):
@@ -49,8 +50,8 @@ class MazeRobot:
     def _follow_line(self):
 
         NEUTRAL_AMBIENT = self.neutral_ambient
-        TURN_AMPLIFY = 4
-        FACTOR_AMPLIFY_DARK = 1
+        TURN_AMPLIFY = 8
+        FACTOR_AMPLIFY_DARK = 1.5
 
         while True:
             current_ambient = self.drive_sensor.ambient()
@@ -58,10 +59,10 @@ class MazeRobot:
 
             dark = difference_neutral < 0
             if dark:
-                self._drive(speed=50,
+                self._drive(speed=(1/(abs(difference_neutral)+1)) * 50,
                                      turn_rate=- difference_neutral * TURN_AMPLIFY * FACTOR_AMPLIFY_DARK)
             else:
-                self._drive(speed=50,
+                self._drive(speed=(1/(abs(difference_neutral)+1)) * 50,
                                      turn_rate= - difference_neutral * TURN_AMPLIFY)
 
             if self._check_intersection():
@@ -69,7 +70,7 @@ class MazeRobot:
                 #self._prepare_for_intersection()
                 self._next_instruction()
 
-            time.sleep(0.1)
+            time.sleep(0.05)
 
     def _check_intersection(self):
         if self.left_sensor.ambient() <= self.left_min or self.right_sensor.ambient() <= self.right_min:
@@ -98,12 +99,18 @@ class MazeRobot:
         time.sleep(3.5)
         self._drive(speed=0, turn_rate=-40)
         time.sleep(3)
+        self._drive(speed=30, turn_rate=0)
+        time.sleep(0.5)
+
 
     def _turn_left(self):
         self._drive(speed=30, turn_rate=0)
         time.sleep(3.5)
         self._drive(speed=0, turn_rate=40)
         time.sleep(3)
+        self._drive(speed=30, turn_rate=0)
+        time.sleep(0.5)
+
 
     def _go_straight(self):
         self._drive(speed=30, turn_rate=0)
@@ -111,7 +118,7 @@ class MazeRobot:
 
     def _turn_around(self):
         self._drive(speed=-20, turn_rate=0)
-        time.sleep(4)
+        time.sleep(3)
         self._drive(speed=0, turn_rate=40)
         time.sleep(6.3)
         self._drive(speed=-20, turn_rate=0)
