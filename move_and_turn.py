@@ -33,8 +33,8 @@ class MazeRobot:
 
         self.instructions = iter(instructions)
 
-
-
+        
+        #self._next_instruction()
         self.neutral_ambient = self.find_ambient()
 
         # this will maybe also have some info about position, possibly
