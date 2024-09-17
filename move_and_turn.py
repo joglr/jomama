@@ -87,13 +87,13 @@ class MazeRobot:
 
     def _turn_right(self):
         self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(3.5)
+        time.sleep(3.6)
         self.drivebase.drive(speed=-0, turn_rate=-40)
         time.sleep(3)
 
     def _turn_left(self):
         self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(3.5)
+        time.sleep(3.6)
         self.drivebase.drive(speed=-0, turn_rate=40)
         time.sleep(3)
 
