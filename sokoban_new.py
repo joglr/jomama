@@ -21,15 +21,6 @@ DOWN = (0, 1)
 
 actions = [LEFT, RIGHT, UP, DOWN]
 
-def reconstruct_path(node):
-    path = []
-    while node.parent is not None:
-        path.append(node.action)
-        node = node.parent
-    path.reverse()
-    return path
-
-
 def parse_world(filename):
     with open(filename) as f:
         world = []
@@ -117,8 +108,14 @@ def makeMove(currentState, robotPosition, action):
             return nextState
         
     return 
-    
 
+def reconstruct_path(node):
+    path = []
+    while node.parent is not None:
+        path.append(node.action)
+        node = node.parent
+    path.reverse()
+    return path
 
 def main():
     openQueue = []
@@ -127,32 +124,47 @@ def main():
     filename = sys.argv[1]
     initialState = parse_world(filename)
 
-    openQueue.append(initialState)
+    # Create the root node (initial state) with no parent and no action
+    root = TreeNode(state=initialState)
+    openQueue.append(root)
+
     targetPositions = findElementPositions(initialState, TARGET)
 
     solutionFound = False
+    solutionNode = None
 
-    i = -1
     while len(openQueue) > 0:
-        currentState = openQueue.pop(0)
-        #for s in currentState:
-        #    print(s)
-        #print("----------------------")
+        currentNode = openQueue.pop(0)
+        currentState = currentNode.state
+
         closedList.append(currentState)
+
         robotPosition = findElementPositions(currentState, ROBOT)[0]
+
         for action in actions:
             newState = makeMove(currentState, robotPosition, action)
             if newState is not None and newState not in closedList:
-                
+                newNode = TreeNode(state=newState, parent=currentNode, action=action)
+
                 canPositions = findElementPositions(newState, CAN)
                 if set(targetPositions) == set(canPositions):
-                    for s in newState:
-                        print(s)
+                    solutionNode = newNode
                     solutionFound = True
                     break
-                openQueue.append(newState)
+
+                openQueue.append(newNode)
         if solutionFound:
-            break  
+            break
+
+    if solutionFound and solutionNode:
+        # Reconstruct the path by backtracking from the solution node
+        path = reconstruct_path(solutionNode)
+        print("Solution path (actions):", path)
+        print("Final state:")
+        for row in solutionNode.state:
+            print(''.join(row))
+    else:
+        print("No solution found")
 
 if __name__ == "__main__":
     main()
