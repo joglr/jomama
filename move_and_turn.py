@@ -35,7 +35,7 @@ class MazeRobot:
 
         self.instructions = iter(instructions)
 
-        
+
         #self._next_instruction()
         self.neutral_ambient = self.find_ambient()
 
@@ -269,16 +269,15 @@ class MazeRobot:
         time.sleep(2.5)
 
 
-new_instructions = ['up',
-                    'up',
-                    'left',
-                    'left',
-                    'down',
-                    'down',
-                    'right',
-                    'right'
-            ]
+def main():
+    new_instructions = ['up',
+                        'up',
+                        'down'
+                ]
 
-maze_robot = MazeRobot(new_instructions)
+    maze_robot = MazeRobot(new_instructions)
 
-maze_robot._follow_line()
+    maze_robot._follow_line()
+
+if __file__ == "__main__":
+    main()
