@@ -232,5 +232,5 @@ def main():
         print("No solution found")
 
 if __name__ == "__main__":
-    main()
+    solve()
 
