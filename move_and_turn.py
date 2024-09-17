@@ -20,25 +20,28 @@ class MazeRobot:
         self.left_motor = Motor(Port.A)
         self.right_motor = Motor(Port.C)
 
+        self.left_min = 1
+        self.right_min = 1
+
         self.beeper = EV3Brick()
 
         self.drivebase = DriveBase(self.left_motor,
                                    self.right_motor,
-                                   wheel_diameter=55.5,
-                                   axle_track=104)
+                                   wheel_diameter=32,
+                                   axle_track=135)
 
         self.instructions = iter(instructions)
 
 
 
-        self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
+        self.neutral_ambient = self.find_ambient()
 
         # this will maybe also have some info about position, possibly
 
     def _follow_line(self):
 
         NEUTRAL_AMBIENT = self.neutral_ambient
-        TURN_AMPLIFY = 2
+        TURN_AMPLIFY = 4
         FACTOR_AMPLIFY_DARK = 1
 
         while True:
@@ -47,10 +50,10 @@ class MazeRobot:
 
             dark = difference_neutral < 0
             if dark:
-                self.drivebase.drive(speed=-30,
+                self.drivebase.drive(speed=-50,
                                      turn_rate=- difference_neutral * TURN_AMPLIFY * FACTOR_AMPLIFY_DARK)
             else:
-                self.drivebase.drive(speed=-30,
+                self.drivebase.drive(speed=-50,
                                      turn_rate= - difference_neutral * TURN_AMPLIFY)
 
             if self._check_intersection():
@@ -70,28 +73,28 @@ class MazeRobot:
 
         if instruction == 'left':
             self._turn_left()
-            self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
+            #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
         elif instruction == 'right':
             self._turn_right()
-            self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
+            #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
         elif instruction == 'straight':
             self._go_straight()
-            self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
+            #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
         elif instruction == 'turn':
             self._turn_around()
-            self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
+            #self.neutral_ambient, self.right_min, self.left_min = self._calibrate_ambient_2()
 
 
     def _turn_right(self):
         self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(3.5)
-        self.drivebase.drive(speed=-0, turn_rate=-30)
+        time.sleep(2.5)
+        self.drivebase.drive(speed=-0, turn_rate=-40)
         time.sleep(3)
 
     def _turn_left(self):
         self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(4.5)
-        self.drivebase.drive(speed=-0, turn_rate=30)
+        time.sleep(2.5)
+        self.drivebase.drive(speed=-0, turn_rate=40)
         time.sleep(3)
 
     def _go_straight(self):
