@@ -38,6 +38,14 @@ class MazeRobot:
 
         # this will maybe also have some info about position, possibly
 
+    def _drive(self, *args, **kwargs):
+        if 'speed' not in kwargs:
+            kwargs['speed'] = 0
+        else:
+            kwargs['speed'] = -kwargs['speed']
+
+        self.drivebase.drive(*args, **kwargs)
+
     def _follow_line(self):
 
         NEUTRAL_AMBIENT = self.neutral_ambient
@@ -50,10 +58,10 @@ class MazeRobot:
 
             dark = difference_neutral < 0
             if dark:
-                self.drivebase.drive(speed=-50,
+                self._drive(speed=50,
                                      turn_rate=- difference_neutral * TURN_AMPLIFY * FACTOR_AMPLIFY_DARK)
             else:
-                self.drivebase.drive(speed=-50,
+                self._drive(speed=50,
                                      turn_rate= - difference_neutral * TURN_AMPLIFY)
 
             if self._check_intersection():
@@ -86,27 +94,27 @@ class MazeRobot:
 
 
     def _turn_right(self):
-        self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(3.6)
-        self.drivebase.drive(speed=-0, turn_rate=-40)
+        self._drive(speed=30, turn_rate=0)
+        time.sleep(3.5)
+        self._drive(speed=0, turn_rate=-40)
         time.sleep(3)
 
     def _turn_left(self):
-        self.drivebase.drive(speed=-30, turn_rate=0)
-        time.sleep(3.6)
-        self.drivebase.drive(speed=-0, turn_rate=40)
+        self._drive(speed=30, turn_rate=0)
+        time.sleep(3.5)
+        self._drive(speed=0, turn_rate=40)
         time.sleep(3)
 
     def _go_straight(self):
-        self.drivebase.drive(speed=-30, turn_rate=0)
+        self._drive(speed=30, turn_rate=0)
         time.sleep(3)
 
     def _turn_around(self):
-        self.drivebase.drive(speed=20, turn_rate=0)
+        self._drive(speed=-20, turn_rate=0)
         time.sleep(4)
-        self.drivebase.drive(speed=-0, turn_rate=40)
+        self._drive(speed=0, turn_rate=40)
         time.sleep(6.3)
-        self.drivebase.drive(speed=20, turn_rate=0)
+        self._drive(speed=-20, turn_rate=0)
         time.sleep(3)
 
     def find_ambient(self):
@@ -123,21 +131,21 @@ class MazeRobot:
 
         # turns left and measures
 
-        self.drivebase.drive(speed=-0, turn_rate=20)
+        self._drive(speed=0, turn_rate=20)
         time.sleep(1)
-        self.drivebase.drive(speed=-0, turn_rate=0)
+        self._drive(speed=0, turn_rate=0)
         light = self.find_ambient()
-        self.drivebase.drive(speed=-0, turn_rate=-20)
+        self._drive(speed=0, turn_rate=-20)
         time.sleep(1)
 
 
         # turns right and measure
 
-        self.drivebase.drive(speed=-0, turn_rate=-20)
+        self._drive(speed=0, turn_rate=-20)
         time.sleep(1)
-        self.drivebase.drive(speed=-0, turn_rate=0)
+        self._drive(speed=0, turn_rate=0)
         dark = self.find_ambient()
-        self.drivebase.drive(speed=-0, turn_rate=20)
+        self._drive(speed=0, turn_rate=20)
         time.sleep(1)
 
         return (light + dark) / 2
@@ -149,10 +157,10 @@ class MazeRobot:
         right_ambient = []
         left_ambient = []
 
-        self.drivebase.drive(speed=-0, turn_rate=20)
+        self._drive(speed=0, turn_rate=20)
         time.sleep(1.5)
 
-        self.drivebase.drive(speed=-0, turn_rate=-20)
+        self._drive(speed=0, turn_rate=-20)
 
         for _ in range(40):
             ambients.append(self.drive_sensor.ambient())
@@ -160,7 +168,7 @@ class MazeRobot:
             left_ambient.append(self.left_sensor.ambient())
             time.sleep(3 / 40)
 
-        self.drivebase.drive(speed=-0, turn_rate=20)
+        self._drive(speed=0, turn_rate=20)
         time.sleep(1.5)
 
         differences = []
@@ -179,15 +187,15 @@ class MazeRobot:
 
     def _prepare_for_intersection(self):
 
-        self.drivebase.drive(speed=--20, turn_rate=0)
+        self._drive(speed=-20, turn_rate=0)
         time.sleep(2.5)
 
         ambients = []
 
-        self.drivebase.drive(speed=-0, turn_rate=-20)
+        self._drive(speed=0, turn_rate=-20)
         time.sleep(1.5)
 
-        self.drivebase.drive(speed=-0, turn_rate=20)
+        self._drive(speed=0, turn_rate=20)
 
         for _ in range(40):
             ambients.append(self.drive_sensor.ambient())
@@ -205,15 +213,15 @@ class MazeRobot:
 
         print(avg_ind)
 
-        self.drivebase.drive(speed=-0, turn_rate=-20)
+        self._drive(speed=0, turn_rate=-20)
         time.sleep(3 * ((37.5 - avg_ind) / 37.5))
 
-        self.drivebase.drive(speed=-20, turn_rate=0)
+        self._drive(speed=20, turn_rate=0)
         time.sleep(2.5)
 
     def _prepare_for_intersection_2(self):
 
-        self.drivebase.drive(speed=--20, turn_rate=0)
+        self._drive(speed=-20, turn_rate=0)
         time.sleep(2.5)
 
         neutral_ambient = self._calibrate_ambient_2()
@@ -226,15 +234,15 @@ class MazeRobot:
 
             dark = difference_neutral < 0
             if dark:
-                self.drivebase.drive(speed=-0,
+                self._drive(speed=0,
                                      turn_rate=difference_neutral * TURN_AMPLIFY * FACTOR_AMPLIFY_DARK)
             else:
-                self.drivebase.drive(speed=-0,
+                self._drive(speed=0,
                                      turn_rate=difference_neutral * TURN_AMPLIFY)
 
             time.sleep(3 / 40)
 
-        self.drivebase.drive(speed=-20, turn_rate=0)
+        self._drive(speed=20, turn_rate=0)
         time.sleep(2.5)
 
 
