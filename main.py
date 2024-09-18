@@ -1,9 +1,14 @@
 #!/usr/bin/env pybricks-micropython
 from sokoban_new import solve
-from move_and_turn import MazeRobot
+from move_and_turn_markus import MazeRobot
 
-instructions = solve("worlds/board.txt")
+input_ = "worlds/board.txt"
+
+instructions = solve(input_)
+
 robot = MazeRobot(instructions)
+robot.initialize_direction(input_)
+
 robot.follow_line()
 
 # #!/usr/bin/env pybricks-micropython
