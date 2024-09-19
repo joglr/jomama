@@ -5,5 +5,5 @@ X       X
 X X$X X X
 X     . X
 X X X X X
-X*      X
+X       X
 XXXXXXXXX

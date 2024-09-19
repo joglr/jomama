@@ -7,7 +7,7 @@ class TreeNode:
         self.parent = parent
         self.action = action
 
-WALL = "#"
+WALL = "X"
 AIR = " "
 CAN = "$"
 TARGET = "."
@@ -65,6 +65,9 @@ def parse_world_competition_format(filename):
             if j in indices_to_remove:
                 continue
             new_world[-1].append(world[i][j])
+
+    # for i in range(len(new_world)):
+    #     new_world[i] = ''.join(new_world[i])
     
     return new_world
 
@@ -224,7 +227,7 @@ def mergeTripletsIfSame(arr):
     return result
 
 
-def solve(filename=None):
+def solve(filename=None, competition_format=False):
     openQueue = []
     closedSet = set()
 
@@ -237,7 +240,10 @@ def solve(filename=None):
     if filename is None:
         filename = "worlds/board.txt"
 
-    initialState = parse_world(filename)
+    if competition_format:
+        initialState = parse_world_competition_format(filename)
+    else:
+        initialState = parse_world(filename)
 
     # Create the root node (initial state) with no parent and no action
     root = TreeNode(state=initialState)

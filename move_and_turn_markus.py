@@ -39,6 +39,8 @@ class MazeRobot:
 
         self.orientation = 0
 
+        self.counter = 0.3
+
         self.drivebase = DriveBase(
             self.left_motor, self.right_motor, wheel_diameter=32, axle_track=135
         )
@@ -55,14 +57,20 @@ class MazeRobot:
         self.drivebase.drive(*args, **kwargs)
 
     def follow_line(self):
-        NEUTRAL_AMBIENT = self.neutral_ambient
-        TURN_AMPLIFY = 4
-        FACTOR_AMPLIFY_DARK = 1.5
+        # NEUTRAL_AMBIENT = self.neutral_ambient
+        NEUTRAL_AMBIENT = 32
+        TURN_AMPLIFY = 2
+        FACTOR_AMPLIFY_DARK = 1
 
-        counter = 0.3
+        self.counter = 0.3
 
         while True:
-            current_ambient = self.drive_sensor.ambient()
+
+            if self.check_intersection():
+                self.next_instruction()
+                self.counter = 0.3
+
+            current_ambient = self.drive_sensor.reflection()
             difference_neutral = current_ambient - NEUTRAL_AMBIENT
 
             self.brick.screen.draw_text(
@@ -76,20 +84,17 @@ class MazeRobot:
             dark = difference_neutral < 0
             if dark:
                 self.drive(
-                    speed=(1 / (abs(difference_neutral) + 1)) * 50 * min(1, counter),
+                    speed=(1 / max((abs(difference_neutral) / 5), 1)) * 90 * min(1, self.counter),
                     turn_rate=-difference_neutral * TURN_AMPLIFY * FACTOR_AMPLIFY_DARK,
                 )
             else:
                 self.drive(
-                    speed=(1 / (abs(difference_neutral) + 1)) * 50 * min(1, counter),
+                    speed=(1 / max((abs(difference_neutral) / 5), 1)) * 90 * min(1, self.counter),
                     turn_rate=-difference_neutral * TURN_AMPLIFY,
                 )
 
-            if self.check_intersection():
-                self.next_instruction()
-                counter = 0.3
 
-            counter += 0.002
+            self.counter += 0.002
             time.sleep(0.02)
 
     def check_intersection(self):
@@ -132,23 +137,23 @@ class MazeRobot:
 
     def turn_right(self):
         self.drive(speed=30, turn_rate=0)
-        time.sleep(3.2)
+        time.sleep(2.9)
         self.drive(speed=0, turn_rate=-40)
         time.sleep(3)
         self.drive(speed=30, turn_rate=0)
-        time.sleep(0.5)
+        time.sleep(1)
 
     def turn_left(self):
         self.drive(speed=30, turn_rate=0)
-        time.sleep(3.4)
+        time.sleep(3.1)
         self.drive(speed=0, turn_rate=40)
         time.sleep(3)
         self.drive(speed=30, turn_rate=0)
-        time.sleep(0.5)
+        time.sleep(1)
 
     def go_straight(self):
         self.drive(speed=30, turn_rate=0)
-        time.sleep(3)
+        time.sleep(4)
 
     def turn_around(self):
         self.drive(speed=-20, turn_rate=0)
@@ -161,40 +166,51 @@ class MazeRobot:
         time.sleep(6.6)
         self.drive(speed=-20, turn_rate=0)
         time.sleep(3.5)
+        self.drive(speed=0, turn_rate=0)
+        for i in range(10):
+            if self.check_intersection():
+                self.next_instruction()
+                self.counter = 0.3
+                break
+            time.sleep(0.05)
+
 
     def find_ambient(self):
         ambients = []
 
         for i in range(100):
-            ambients.append(self.drive_sensor.ambient())
+            ambients.append(self.drive_sensor.reflection())
             time.sleep(0.01)
 
         return sum(ambients) / len(ambients)
 
 
 
-    def find_direction(self, input_):
+    def find_direction(self, input_, competition_format=False):
 
-        world = parse_world(input_)
+        if competition_format:
+            world = parse_world_competition_format(input_)
+        else:
+            world = parse_world(input_)
 
         target_position = findElementPositions(world, ROBOT)
 
         i, j = target_position[0][0], target_position[0][1]
 
-        if world[i + 1][j] == ' ':
+        if world[i + 1][j] == ' ' or world[i + 1][j] == '.':
             return 0
-        elif world[i][j - 1] == ' ':
+        elif world[i][j - 1] == ' ' or world[i][j - 1] == '.':
             return 90
-        elif world[i - 1][j] == ' ':
+        elif world[i - 1][j] == ' ' or world[i - 1][j] == '.':
             return 180
-        elif world[i][j + 1] == ' ':
+        elif world[i][j + 1] == ' ' or world[i][j + 1] == '.':
             return 270
         else:
             return 0
         
-    def initialize_direction(self, input_):
+    def initialize_direction(self, input_, competition_format=False):
 
-        self.orientation = self.find_direction(input_)
+        self.orientation = self.find_direction(input_, competition_format)
 
 
 

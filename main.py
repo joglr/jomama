@@ -2,9 +2,16 @@
 from sokoban_new import solve
 from move_and_turn_markus import MazeRobot
 
-input_ = "worlds/board.txt"
+input_ = "worlds/comp_world.txt"
 
-instructions = solve(input_)
+# instructions = solve(input_, competition_format=True)
+
+instructions = []
+with open('instruction_set.txt', 'r') as f:
+    for line in f.readlines():
+        instructions.append(line.strip())
+
+print(instructions)
 
 robot = MazeRobot(instructions)
 robot.initialize_direction(input_)
