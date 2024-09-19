@@ -43,6 +43,31 @@ def parse_world(filename):
 
         return world
 
+
+def parse_world_competition_format(filename):
+
+    with open(filename) as f:
+        world = []
+
+        for line in f:
+            row = list(line.strip())
+            world.append(row)
+
+    indices_to_remove = {2, 4, 6}
+
+    new_world = []
+
+    for i in range(len(world)):
+        if i in indices_to_remove:
+            continue
+        new_world.append([])
+        for j in range(len(world[i])):
+            if j in indices_to_remove:
+                continue
+            new_world[-1].append(world[i][j])
+    
+    return new_world
+
 def addCoordinates(p1, p2):
     p1X, p1Y = p1
     p2X, p2Y = p2
