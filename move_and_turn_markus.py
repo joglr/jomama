@@ -163,7 +163,7 @@ class MazeRobot:
         self.drive(speed=-20, turn_rate=0)
         time.sleep(3)
         self.drive(speed=0, turn_rate=40)
-        time.sleep(6.6)
+        time.sleep(6.3)
         self.drive(speed=-20, turn_rate=0)
         time.sleep(3.5)
         self.drive(speed=0, turn_rate=0)
